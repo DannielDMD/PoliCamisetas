@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRUD Usuarios</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-900">
+
+    <div class="container mx-auto p-6">
+
+        <!-- Título -->
+        <h1 class="text-3xl font-bold text-center mb-6">Gestión de Usuarios</h1>
+
+        <!-- Formulario para Crear Usuario -->
+        <div class="bg-white shadow-md rounded-lg p-6 mb-6">
+            <h2 class="text-2xl font-semibold mb-4">Crear Usuario</h2>
+            <form id="crear-usuario-form" class="space-y-4">
+                <input type="text" id="nombre" placeholder="Nombre" required class="w-full p-3 border rounded-lg shadow-sm">
+                <input type="email" id="correo" placeholder="Correo" required class="w-full p-3 border rounded-lg shadow-sm">
+                <input type="password" id="contraseña" placeholder="Contraseña" required class="w-full p-3 border rounded-lg shadow-sm">
+                <input type="text" id="rol" placeholder="Rol" required class="w-full p-3 border rounded-lg shadow-sm">
+                <button type="submit" class="w-full bg-blue-500 text-white p-3 rounded-lg hover:bg-blue-600">Crear Usuario</button>
+            </form>
+        </div>
+
+        <!-- Formulario para Actualizar Usuario -->
+        <div class="bg-white shadow-md rounded-lg p-6 mb-6">
+            <h2 class="text-2xl font-semibold mb-4">Actualizar Usuario</h2>
+            <form id="actualizar-usuario-form" class="space-y-4">
+                <input type="number" id="usuario-id" placeholder="ID del Usuario" required class="w-full p-3 border rounded-lg shadow-sm">
+                <input type="text" id="nuevo-nombre" placeholder="Nuevo Nombre" class="w-full p-3 border rounded-lg shadow-sm">
+                <input type="email" id="nuevo-correo" placeholder="Nuevo Correo" class="w-full p-3 border rounded-lg shadow-sm">
+                <input type="text" id="nuevo-rol" placeholder="Nuevo Rol" class="w-full p-3 border rounded-lg shadow-sm">
+                <button type="submit" class="w-full bg-green-500 text-white p-3 rounded-lg hover:bg-green-600">Actualizar Usuario</button>
+            </form>
+        </div>
+
+        <!-- Formulario para Eliminar Usuario -->
+        <div class="bg-white shadow-md rounded-lg p-6 mb-6">
+            <h2 class="text-2xl font-semibold mb-4">Eliminar Usuario</h2>
+            <form id="eliminar-usuario-form" class="space-y-4">
+                <input type="number" id="eliminar-usuario-id" placeholder="ID del Usuario a Eliminar" required class="w-full p-3 border rounded-lg shadow-sm">
+                <button type="submit" class="w-full bg-red-500 text-white p-3 rounded-lg hover:bg-red-600">Eliminar Usuario</button>
+            </form>
+        </div>
+
+        <!-- Tabla para Mostrar Usuarios -->
+        <div class="bg-white shadow-md rounded-lg p-6">
+            <h2 class="text-2xl font-semibold mb-4">Lista de Usuarios</h2>
+            <button onclick="obtenerUsuarios()" class="mb-4 bg-blue-500 text-white p-3 rounded-lg hover:bg-blue-600">Refrescar Lista de Usuarios</button>
+            <table class="w-full table-auto border-collapse">
+                <thead class="bg-gray-200">
+                    <tr>
+                        <th class="p-3 text-left">ID</th>
+                        <th class="p-3 text-left">Nombre</th>
+                        <th class="p-3 text-left">Correo</th>
+                        <th class="p-3 text-left">Rol</th>
+                    </tr>
+                </thead>
+                <tbody id="usuarios-lista" class="text-sm"></tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <script>
+        const API_URL = '/api/usuarios';
+
+        // Crear Usuario
+        document.getElementById('crear-usuario-form').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const nombre = document.getElementById('nombre').value;
+            const correo = document.getElementById('correo').value;
+            const contraseña = document.getElementById('contraseña').value;
+            const rol = document.getElementById('rol').value;
+
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nombre, correo, contraseña, rol })
+            });
+            alert('Usuario creado');
+            document.getElementById('crear-usuario-form').reset();
+            obtenerUsuarios();
+        });
+
+        // Actualizar Usuario
+        document.getElementById('actualizar-usuario-form').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const id = document.getElementById('usuario-id').value;
+            const nombre = document.getElementById('nuevo-nombre').value;
+            const correo = document.getElementById('nuevo-correo').value;
+            const rol = document.getElementById('nuevo-rol').value;
+
+            const response = await fetch(`${API_URL}/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nombre, correo, rol })
+            });
+            alert('Usuario actualizado');
+            document.getElementById('actualizar-usuario-form').reset();
+            obtenerUsuarios();
+        });
+
+        // Eliminar Usuario
+        document.getElementById('eliminar-usuario-form').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const id = document.getElementById('eliminar-usuario-id').value;
+
+            const response = await fetch(`${API_URL}/${id}`, {
+                method: 'DELETE'
+            });
+            alert('Usuario eliminado');
+            document.getElementById('eliminar-usuario-form').reset();
+            obtenerUsuarios();
+        });
+
+        // Obtener y Mostrar Usuarios
+        async function obtenerUsuarios() {
+            const response = await fetch(API_URL);
+            const usuarios = await response.json();
+            const usuariosLista = document.getElementById('usuarios-lista');
+            usuariosLista.innerHTML = '';
+            usuarios.forEach(usuario => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="p-3">${usuario.id}</td>
+                    <td class="p-3">${usuario.nombre}</td>
+                    <td class="p-3">${usuario.correo}</td>
+                    <td class="p-3">${usuario.rol}</td>
+                `;
+                usuariosLista.appendChild(row);
+            });
+        }
+
+        // Cargar Usuarios al cargar la página
+        window.onload = obtenerUsuarios;
+    </script>
+</body>
+</html>

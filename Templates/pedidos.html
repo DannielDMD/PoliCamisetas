@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRUD Pedidos</title>
+    <script src="https://cdn.tailwindcss.com"></script> <!-- Incluir Tailwind CSS -->
+</head>
+<body class="bg-gray-100 text-gray-900 font-sans">
+
+    <div class="container mx-auto p-4">
+
+        <h1 class="text-4xl font-bold text-center mb-8">CRUD de Pedidos</h1>
+
+        <!-- Formulario para crear un nuevo pedido -->
+        <section class="bg-white p-6 rounded-lg shadow-md mb-8">
+            <h2 class="text-2xl font-semibold mb-4">Crear Pedido</h2>
+            <form id="form-crear-pedido" class="space-y-4">
+                <div class="flex flex-col">
+                    <label for="usuario-id" class="text-sm font-medium text-gray-700">ID Usuario:</label>
+                    <input type="number" id="usuario-id" required class="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="flex flex-col">
+                    <label for="fecha-pedido" class="text-sm font-medium text-gray-700">Fecha del Pedido:</label>
+                    <input type="datetime-local" id="fecha-pedido" required class="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="flex flex-col">
+                    <label for="total" class="text-sm font-medium text-gray-700">Total:</label>
+                    <input type="number" id="total" step="0.01" required class="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="flex flex-col">
+                    <label for="estado" class="text-sm font-medium text-gray-700">Estado:</label>
+                    <input type="text" id="estado" required class="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <button type="button" onclick="crearPedido()" class="w-full py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-200">Crear Pedido</button>
+            </form>
+        </section>
+
+        <!-- Lista de pedidos -->
+        <section class="bg-white p-6 rounded-lg shadow-md mb-8">
+            <h2 class="text-2xl font-semibold mb-4">Lista de Pedidos</h2>
+            <button onclick="obtenerPedidos()" class="py-2 px-4 bg-green-600 text-white rounded-md hover:bg-green-700 transition duration-200">Mostrar Pedidos</button>
+            <ul id="lista-pedidos" class="mt-4 space-y-4">
+                <!-- Lista de pedidos se mostrará aquí -->
+            </ul>
+        </section>
+
+        <!-- Formulario para actualizar un pedido existente -->
+        <section class="bg-white p-6 rounded-lg shadow-md mb-8">
+            <h2 class="text-2xl font-semibold mb-4">Actualizar Pedido</h2>
+            <form id="form-actualizar-pedido" class="space-y-4">
+                <div class="flex flex-col">
+                    <label for="id-actualizar" class="text-sm font-medium text-gray-700">ID del Pedido:</label>
+                    <input type="number" id="id-actualizar" required class="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="flex flex-col">
+                    <label for="usuario-id-actualizar" class="text-sm font-medium text-gray-700">ID Usuario:</label>
+                    <input type="number" id="usuario-id-actualizar" required class="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="flex flex-col">
+                    <label for="fecha-pedido-actualizar" class="text-sm font-medium text-gray-700">Fecha del Pedido:</label>
+                    <input type="datetime-local" id="fecha-pedido-actualizar" required class="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="flex flex-col">
+                    <label for="total-actualizar" class="text-sm font-medium text-gray-700">Total:</label>
+                    <input type="number" id="total-actualizar" step="0.01" required class="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="flex flex-col">
+                    <label for="estado-actualizar" class="text-sm font-medium text-gray-700">Estado:</label>
+                    <input type="text" id="estado-actualizar" required class="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <button type="button" onclick="actualizarPedido()" class="w-full py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 transition duration-200">Actualizar Pedido</button>
+            </form>
+        </section>
+
+        <!-- Formulario para eliminar un pedido -->
+        <section class="bg-white p-6 rounded-lg shadow-md mb-8">
+            <h2 class="text-2xl font-semibold mb-4">Eliminar Pedido</h2>
+            <div class="flex flex-col">
+                <label for="id-eliminar" class="text-sm font-medium text-gray-700">ID del Pedido:</label>
+                <input type="number" id="id-eliminar" required class="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <button onclick="eliminarPedido()" class="w-full py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition duration-200">Eliminar Pedido</button>
+        </section>
+
+    </div>
+
+    <script>
+        // Obtener todos los pedidos
+        function obtenerPedidos() {
+            fetch('/api/pedidos')
+                .then(response => response.json())
+                .then(pedidos => {
+                    const lista = document.getElementById('lista-pedidos');
+                    lista.innerHTML = '';
+                    pedidos.forEach(pedido => {
+                        const item = document.createElement('li');
+                        item.textContent = `ID: ${pedido.id}, Usuario ID: ${pedido.usuario_id}, Fecha: ${pedido.fecha_pedido}, Total: ${pedido.total}, Estado: ${pedido.estado}`;
+                        lista.appendChild(item);
+                    });
+                });
+        }
+
+        // Crear un nuevo pedido
+        function crearPedido() {
+            const usuarioId = document.getElementById('usuario-id').value;
+            const fechaPedido = document.getElementById('fecha-pedido').value;
+            const total = document.getElementById('total').value;
+            const estado = document.getElementById('estado').value;
+
+            fetch('/api/pedidos', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ usuario_id: usuarioId, fecha_pedido: fechaPedido, total, estado })
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.mensaje);
+                obtenerPedidos();
+            });
+        }
+
+        // Actualizar un pedido
+        function actualizarPedido() {
+            const id = document.getElementById('id-actualizar').value;
+            const usuarioId = document.getElementById('usuario-id-actualizar').value;
+            const fechaPedido = document.getElementById('fecha-pedido-actualizar').value;
+            const total = document.getElementById('total-actualizar').value;
+            const estado = document.getElementById('estado-actualizar').value;
+
+            fetch(`/api/pedidos/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ usuario_id: usuarioId, fecha_pedido: fechaPedido, total, estado })
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.mensaje);
+                obtenerPedidos();
+            });
+        }
+
+        // Eliminar un pedido
+        function eliminarPedido() {
+            const id = document.getElementById('id-eliminar').value;
+
+            fetch(`/api/pedidos/${id}`, {
+                method: 'DELETE'
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.mensaje);
+                obtenerPedidos();
+            });
+        }
+    </script>
+</body>
+</html>

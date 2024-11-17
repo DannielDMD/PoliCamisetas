@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRUD Estampas</title>
+    <style>
+        /* Estilos generales */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 100vh;
+            padding-top: 20px;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            font-size: 1.8em;
+            color: #333;
+            margin-bottom: 10px;
+            margin-top: 20px;
+        }
+
+        /* Contenedor de los formularios y lista */
+        .container {
+            width: 80%;
+            max-width: 800px;
+            margin-bottom: 30px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        form label {
+            font-size: 1em;
+            color: #555;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0 20px 0;
+            font-size: 1em;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button {
+            font-size: 1em;
+            padding: 12px 20px;
+            margin: 10px 0;
+            cursor: pointer;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            transition: background-color 0.3s, transform 0.2s;
+            width: 100%;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+            transform: scale(1.05);
+        }
+
+        button:focus {
+            outline: none;
+        }
+
+        /* Estilo para la lista de estampas */
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        li {
+            font-size: 1.1em;
+            margin-bottom: 10px;
+            background-color: #fafafa;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+
+        hr {
+            width: 100%;
+            border: 1px solid #ddd;
+            margin: 20px 0;
+        }
+
+        /* Estilos para la sección de botones */
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* Responsividad */
+        @media (max-width: 600px) {
+            input, button {
+                width: 100%;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+
+            h2 {
+                font-size: 1.6em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>CRUD de Estampas</h1>
+
+    <!-- Contenedor para Crear Estampa -->
+    <div class="container">
+        <h2>Crear Estampa</h2>
+        <form id="form-crear-estampa">
+            <label for="nombre">Nombre:</label>
+            <input type="text" id="nombre" required><br>
+            <label for="artista">Artista:</label>
+            <input type="text" id="artista" required><br>
+            <label for="precio">Precio:</label>
+            <input type="number" id="precio" step="0.01" required><br>
+            <label for="stock">Stock:</label>
+            <input type="number" id="stock" required><br>
+            <button type="button" onclick="crearEstampa()">Crear Estampa</button>
+        </form>
+    </div>
+
+    <hr>
+
+    <!-- Contenedor para la lista de estampas -->
+    <div class="container">
+        <h2>Lista de Estampas</h2>
+        <button onclick="obtenerEstampas()">Mostrar Estampas</button>
+        <ul id="lista-estampas"></ul>
+    </div>
+
+    <hr>
+
+    <!-- Contenedor para Actualizar Estampa -->
+    <div class="container">
+        <h2>Actualizar Estampa</h2>
+        <form id="form-actualizar-estampa">
+            <label for="id-actualizar">ID de la Estampa:</label>
+            <input type="number" id="id-actualizar" required><br>
+            <label for="nombre-actualizar">Nombre:</label>
+            <input type="text" id="nombre-actualizar" required><br>
+            <label for="artista-actualizar">Artista:</label>
+            <input type="text" id="artista-actualizar" required><br>
+            <label for="precio-actualizar">Precio:</label>
+            <input type="number" id="precio-actualizar" step="0.01" required><br>
+            <label for="stock-actualizar">Stock:</label>
+            <input type="number" id="stock-actualizar" required><br>
+            <button type="button" onclick="actualizarEstampa()">Actualizar Estampa</button>
+        </form>
+    </div>
+
+    <hr>
+
+    <!-- Contenedor para Eliminar Estampa -->
+    <div class="container">
+        <h2>Eliminar Estampa</h2>
+        <label for="id-eliminar">ID de la Estampa:</label>
+        <input type="number" id="id-eliminar" required><br>
+        <button onclick="eliminarEstampa()">Eliminar Estampa</button>
+    </div>
+
+    <script>
+        // Obtener todas las estampas
+        function obtenerEstampas() {
+            fetch('/api/estampas')
+                .then(response => response.json())
+                .then(estampas => {
+                    const lista = document.getElementById('lista-estampas');
+                    lista.innerHTML = '';
+                    estampas.forEach(estampa => {
+                        const item = document.createElement('li');
+                        item.textContent = `ID: ${estampa.id}, Nombre: ${estampa.nombre}, Artista: ${estampa.artista}, Precio: ${estampa.precio}, Stock: ${estampa.stock}`;
+                        lista.appendChild(item);
+                    });
+                });
+        }
+
+        // Crear una nueva estampa
+        function crearEstampa() {
+            const nombre = document.getElementById('nombre').value;
+            const artista = document.getElementById('artista').value;
+            const precio = document.getElementById('precio').value;
+            const stock = document.getElementById('stock').value;
+
+            fetch('/api/estampas', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nombre, artista, precio, stock })
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.mensaje);
+                obtenerEstampas();
+            });
+        }
+
+        // Actualizar una estampa
+        function actualizarEstampa() {
+            const id = document.getElementById('id-actualizar').value;
+            const nombre = document.getElementById('nombre-actualizar').value;
+            const artista = document.getElementById('artista-actualizar').value;
+            const precio = document.getElementById('precio-actualizar').value;
+            const stock = document.getElementById('stock-actualizar').value;
+
+            fetch(`/api/estampas/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nombre, artista, precio, stock })
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.mensaje);
+                obtenerEstampas();
+            });
+        }
+
+        // Eliminar una estampa
+        function eliminarEstampa() {
+            const id = document.getElementById('id-eliminar').value;
+
+            fetch(`/api/estampas/${id}`, {
+                method: 'DELETE'
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.mensaje);
+                obtenerEstampas();
+            });
+        }
+    </script>
+</body>
+</html>
